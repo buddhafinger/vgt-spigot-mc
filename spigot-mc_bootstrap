@@ -1,0 +1,115 @@
+#!/bin/bash
+set -e
+# Minecraft Spigot server quick-installer
+
+#spigot version
+SPI_VER=1.8
+#spigot file
+SPI_FILE=spigot-${SPI_VER}.jar
+
+#build tools url.
+BTOOLS_URL=https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+
+WORK_DIR=/opt/mc
+BUILD_DIR=/opt/mc-build
+
+#Install pre-reqs - spigot.
+export DEBIAN_FRONTEND=noninteractive
+echo "installing packages" 
+apt-get update -y
+apt-get install -y --no-install-recommends git openjdk-7-jdk tar libxtst6 libxtst-dev pastebinit
+echo "finished installing packages"
+
+
+echo "start spigot install"
+# Link work dir to persitent files in shared directory for persistence. 
+test -h /opt/mc || ln -s /vagrant/persistent_files $WORK_DIR
+#check logs dir exists or create it..
+test -d ${WORK_DIR}/logs || mkdir ${WORK_DIR}/logs
+
+#Test for built spigot and if not - then install it.
+if test -e ${WORK_DIR}/${SPI_FILE}; then 
+   echo "Spigot server build exists"
+else
+  #Cleanout old buildtools.
+  rm -rf ${BUILD_DIR}
+  #create and enter build dir.
+  mkdir -p ${BUILD_DIR}
+  cd ${BUILD_DIR}
+  #pull down latest build.
+  curl -v -o $BUILD_DIR/BuildTools.jar $BTOOLS_URL
+  #set git param.
+  #git config --global --unset core.autocrlf
+  #build BuildTools.
+  java -jar BuildTools.jar
+  #Copy server jar to work dir..
+  cp ${BUILD_DIR}/${SPI_FILE} ${WORK_DIR}
+fi
+
+# Upstart manages the server process
+cat > /etc/init/spigot.conf <<SPIGOT_CONF
+# Spigot upstart script
+
+start on (local-filesystems and net-device-up IFACE!=lo)
+stop on [!12345]
+
+respawn
+
+chdir ${WORK_DIR}
+
+exec java -Xmx1024M -Xms1024M -jar ${SPI_FILE} nogui > ${WORK_DIR}/logs/service.log 2>&1
+SPIGOT_CONF
+
+# A logrotate script to keep the minecraft server log from getting too large
+cat > /etc/logrotate.d/spigot <<SPIGOT_LOGROTATE
+${WORK_DIR}/logs/service.log {
+  rotate 24
+  weekly
+  compress
+  notifempty
+  copytruncate
+}
+SPIGOT_LOGROTATE
+
+# Always accept the eula
+cat > ${WORK_DIR}/eula.txt <<EULA
+# By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).
+eula=TRUE
+EULA
+
+initctl reload-configuration
+service spigot start
+
+# Delete the useless vagrant MOTD and install our own
+test -f  /etc/motd.tail || touch /etc/motd.tail
+rm /etc/update-motd.d/*
+cat > /etc/update-motd.d/00-header <<'DONE'
+#!/bin/bash
+
+GREEN='\e[0;32m'
+LBLUE='\e[1;34m'
+RESET='\e[0m'
+echo -e "
+${LBLUE}WELCOME TO SPIGOT MINECRAFT SERVER!
+
+To stop, start, restart or check the status of the the minecraft server process, simply run:${RESET}
+${GREEN}
+  $ service spigot <stop|start|restart|status>${RESET}
+${LBLUE}
+The runtime logs are available at ${WORK_DIR}/logs
+
+To change the min or max server memory values, make the change in:${RESET}
+${GREEN}
+  /etc/init.d/spigot.conf${RESET}
+${LBLUE}
+And then restart the server proces.
+
+Status of spigot server:${RESET}
+
+${GREEN}$(service spigot status)${RESET}
+
+${LBLUE}Have fun!${RESET}"
+DONE
+
+chmod +x /etc/update-motd.d/00-header
+chmod 755 /etc/update-motd.d/00-header
