@@ -1,6 +1,10 @@
 
 Spigot Minecraft in Vagrant instance.
 
+IMPORTANT NOTES:
+Vagrant file contains my local netork IP range and interface, you will need to update for local network and interface.
+Make sure you take backups of persistent_files.
+
 To use:
 - Install Virtualbox / Vagrant.
 - Clone this repo
