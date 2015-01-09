@@ -16,7 +16,7 @@ Notes: THIS IS WORK IN PROGRESS / EARLY STAGES.
 
 Credits:
 
-Branched from Stephen Woods repo: https://github.com/stephen-mw/vagrant_minecraft - which uses standard MC.
+Forked from Stephen Woods repo: https://github.com/stephen-mw/vagrant_minecraft - which uses standard MC.
 
 More info here: http://www.heystephenwood.com/2014/09/vagrant-minecraft.html
 
