@@ -76,15 +76,14 @@ Massive shout to Spigot team - great crew.
 
 
 TO DO:
-Still getting my head around the basics.
+Still getting my head around the basics - pluggins, building, permissions, commands, ops etc.
 
 Aim to maintain a 'vanilla' flavor of this repo.
 
 Create branches for a pre-modded version, World Edit, Essentials etc.
 
+Add in more useful commands and some example configs for pluggins.
 
+Lock down permissions on server - a little too open for my liking.
 
-
-
-
-
+Set spigot server to start on boot once it's installed.  Doesn't appear to be workign at the moment.
