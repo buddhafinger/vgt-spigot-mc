@@ -80,7 +80,7 @@ Still getting my head around the basics - pluggins, building, permissions, comma
 
 Aim to maintain a 'vanilla' flavor of this repo.
 
-Create branches for a pre-modded version, World Edit, Essentials etc.
+Create branches for a pre-modded version, WorldEdit, Essentials, GriefPrevention
 
 Add in more useful commands and some example configs for pluggins.
 
