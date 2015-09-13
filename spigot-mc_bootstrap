@@ -3,7 +3,7 @@ set -e
 # Minecraft Spigot server quick-installer
 
 #spigot version
-SPI_VER=1.8
+SPI_VER=1.8.8
 #spigot file
 SPI_FILE=spigot-${SPI_VER}.jar
 
@@ -15,20 +15,20 @@ BUILD_DIR=/opt/mc-build
 
 #Install pre-reqs - spigot.
 export DEBIAN_FRONTEND=noninteractive
-echo "installing packages" 
+echo "installing packages"
 apt-get update -y
 apt-get install -y --no-install-recommends git openjdk-7-jdk tar libxtst6 libxtst-dev pastebinit
 echo "finished installing packages"
 
 
 echo "start spigot install"
-# Link work dir to persitent files in shared directory for persistence. 
+# Link work dir to persitent files in shared directory for persistence.
 test -h /opt/mc || ln -s /vagrant/persistent_files $WORK_DIR
 #check logs dir exists or create it..
 test -d ${WORK_DIR}/logs || mkdir ${WORK_DIR}/logs
 
 #Test for built spigot and if not - then install it.
-if test -e ${WORK_DIR}/${SPI_FILE}; then 
+if test -e ${WORK_DIR}/${SPI_FILE}; then
    echo "Spigot server build exists"
 else
   #Cleanout old buildtools.
